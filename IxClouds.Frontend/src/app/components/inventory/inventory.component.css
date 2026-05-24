@@ -1,17 +1,115 @@
-.inventory-container { padding: 24px; }
-.header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px; }
-.header h1 { margin: 0; color: #2c3e50; }
-.filters { display: flex; gap: 16px; margin-bottom: 24px; flex-wrap: wrap; }
-.search-field { flex: 1; min-width: 250px; }
-.status-filter { width: 200px; }
-.products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 24px; }
-.product-card img { height: 180px; object-fit: cover; }
-.detail-item { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 14px; }
-.label { color: #7f8c8d; }
-.value { font-weight: 600; }
-.value.critical { color: #dc3545; }
-.value.low { color: #ffc107; }
-.value.normal { color: #28a745; }
-.loading-spinner { display: flex; justify-content: center; padding: 60px; }
-.no-data { text-align: center; padding: 60px; color: #7f8c8d; }
-.no-data mat-icon { font-size: 64px; width: 64px; height: 64px; }
+.inventory-container {
+  padding: 32px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+  gap: 18px;
+}
+
+.header h1 {
+  color: #0f172a;
+}
+
+.filters {
+  display: flex;
+  gap: 18px;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+}
+
+.search-field {
+  flex: 1;
+  min-width: 260px;
+}
+
+.status-filter {
+  width: 220px;
+}
+
+.products-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 28px;
+}
+
+.product-card {
+  overflow: hidden;
+}
+
+.product-card img {
+  height: 240px;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.product-card:hover img {
+  transform: scale(1.03);
+}
+
+mat-card-title {
+  font-size: 18px !important;
+  font-weight: 700 !important;
+}
+
+mat-card-subtitle {
+  color: #64748b !important;
+}
+
+.detail-item {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  font-size: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.label {
+  color: #64748b;
+}
+
+.value {
+  font-weight: 700;
+}
+
+.value.critical {
+  color: #dc2626;
+}
+
+.value.low {
+  color: #f59e0b;
+}
+
+.value.normal {
+  color: #16a34a;
+}
+
+mat-card-actions {
+  display: flex;
+  justify-content: space-between;
+  padding: 16px !important;
+}
+
+.loading-spinner {
+  display: flex;
+  justify-content: center;
+  padding: 80px;
+}
+
+.no-data {
+  text-align: center;
+  padding: 80px;
+  color: #64748b;
+}
+
+.no-data mat-icon {
+  font-size: 72px;
+  width: 72px;
+  height: 72px;
+  margin-bottom: 12px;
+}
