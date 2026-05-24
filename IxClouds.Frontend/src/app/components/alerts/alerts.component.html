@@ -1,0 +1,23 @@
+<div class="alerts-container">
+  <h1>Alertas de Stock</h1>
+  <div *ngIf="loading" class="loading-spinner"><mat-spinner diameter="50"></mat-spinner></div>
+  <div *ngIf="!loading && criticalProducts.length === 0 && lowStockProducts.length === 0" class="no-alerts"><mat-icon>check_circle</mat-icon><p>No hay alertas de stock</p></div>
+  <div *ngIf="criticalProducts.length > 0" class="alert-section">
+    <h2 class="critical-title"><mat-icon>warning</mat-icon> Stock Critico (0-2 unidades)</h2>
+    <div class="alert-grid">
+      <mat-card *ngFor="let p of criticalProducts" class="critical-card">
+        <mat-card-header><mat-card-title>{{ p.brand }} {{ p.phoneModel }}</mat-card-title><mat-card-subtitle>{{ p.material }}</mat-card-subtitle></mat-card-header>
+        <mat-card-content><p class="stock-value critical">{{ p.stock }} unidades</p><p>Precio venta: {{ p.salePrice | currency:"COP":"symbol":"1.0-0" }}</p></mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+  <div *ngIf="lowStockProducts.length > 0" class="alert-section">
+    <h2 class="low-title"><mat-icon>info</mat-icon> Stock Bajo (3-10 unidades)</h2>
+    <div class="alert-grid">
+      <mat-card *ngFor="let p of lowStockProducts" class="low-card">
+        <mat-card-header><mat-card-title>{{ p.brand }} {{ p.phoneModel }}</mat-card-title><mat-card-subtitle>{{ p.material }}</mat-card-subtitle></mat-card-header>
+        <mat-card-content><p class="stock-value low">{{ p.stock }} unidades</p><p>Precio venta: {{ p.salePrice | currency:"COP":"symbol":"1.0-0" }}</p></mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+</div>

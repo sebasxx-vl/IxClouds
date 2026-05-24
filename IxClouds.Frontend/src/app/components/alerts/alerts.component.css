@@ -1,0 +1,14 @@
+.alerts-container { padding: 24px; }
+h1 { color: #2c3e50; margin-bottom: 24px; }
+.alert-section { margin-bottom: 32px; }
+.alert-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
+.critical-title { display: flex; align-items: center; gap: 8px; color: #dc3545; margin-bottom: 16px; }
+.low-title { display: flex; align-items: center; gap: 8px; color: #ffc107; margin-bottom: 16px; }
+.critical-card { border-left: 4px solid #dc3545; }
+.low-card { border-left: 4px solid #ffc107; }
+.stock-value { font-size: 20px; font-weight: bold; margin: 8px 0; }
+.stock-value.critical { color: #dc3545; }
+.stock-value.low { color: #ffc107; }
+.loading-spinner { display: flex; justify-content: center; padding: 60px; }
+.no-alerts { text-align: center; padding: 60px; color: #28a745; }
+.no-alerts mat-icon { font-size: 64px; width: 64px; height: 64px; }

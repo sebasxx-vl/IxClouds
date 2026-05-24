@@ -1,0 +1,17 @@
+.inventory-container { padding: 24px; }
+.header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px; }
+.header h1 { margin: 0; color: #2c3e50; }
+.filters { display: flex; gap: 16px; margin-bottom: 24px; flex-wrap: wrap; }
+.search-field { flex: 1; min-width: 250px; }
+.status-filter { width: 200px; }
+.products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 24px; }
+.product-card img { height: 180px; object-fit: cover; }
+.detail-item { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 14px; }
+.label { color: #7f8c8d; }
+.value { font-weight: 600; }
+.value.critical { color: #dc3545; }
+.value.low { color: #ffc107; }
+.value.normal { color: #28a745; }
+.loading-spinner { display: flex; justify-content: center; padding: 60px; }
+.no-data { text-align: center; padding: 60px; color: #7f8c8d; }
+.no-data mat-icon { font-size: 64px; width: 64px; height: 64px; }

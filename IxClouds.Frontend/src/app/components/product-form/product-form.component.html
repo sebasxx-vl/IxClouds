@@ -1,0 +1,22 @@
+<h2 mat-dialog-title>{{ isEdit ? "Editar Producto" : "Nuevo Producto" }}</h2>
+<form [formGroup]="form" (ngSubmit)="onSubmit()">
+  <mat-dialog-content>
+    <div class="form-grid">
+      <mat-form-field appearance="outline"><mat-label>Marca</mat-label><input matInput formControlName="brand"><mat-error *ngIf="form.get('brand')?.hasError('required')">Requerido</mat-error></mat-form-field>
+      <mat-form-field appearance="outline"><mat-label>Modelo</mat-label><input matInput formControlName="phoneModel"><mat-error *ngIf="form.get('phoneModel')?.hasError('required')">Requerido</mat-error></mat-form-field>
+      <mat-form-field appearance="outline"><mat-label>Genero</mat-label><input matInput formControlName="gender"></mat-form-field>
+      <mat-form-field appearance="outline"><mat-label>Material</mat-label><input matInput formControlName="material"></mat-form-field>
+      <mat-form-field appearance="outline"><mat-label>Stock</mat-label><input matInput type="number" formControlName="stock"></mat-form-field>
+      <mat-form-field appearance="outline"><mat-label>Precio Compra</mat-label><input matInput type="number" formControlName="purchasePrice"><span matPrefix>$&nbsp;</span></mat-form-field>
+      <mat-form-field appearance="outline"><mat-label>Precio Venta</mat-label><input matInput type="number" formControlName="salePrice"><span matPrefix>$&nbsp;</span></mat-form-field>
+      <mat-form-field appearance="outline" class="full-width"><mat-label>URL de Imagen</mat-label><input matInput formControlName="imageUrl"></mat-form-field>
+    </div>
+  </mat-dialog-content>
+  <mat-dialog-actions align="end">
+    <button mat-button type="button" (click)="onCancel()">Cancelar</button>
+    <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid || loading">
+      <mat-spinner *ngIf="loading" diameter="20"></mat-spinner>
+      <span *ngIf="!loading">{{ isEdit ? "Actualizar" : "Crear" }}</span>
+    </button>
+  </mat-dialog-actions>
+</form>

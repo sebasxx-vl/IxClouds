@@ -1,0 +1,15 @@
+.dashboard-container { padding: 24px; }
+.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 24px; }
+.stat-card mat-card-content { display: flex; align-items: center; gap: 16px; padding: 16px; }
+.stat-icon { background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 50%; width: 56px; height: 56px; display: flex; align-items: center; justify-content: center; }
+.stat-icon mat-icon { color: white; font-size: 28px; width: 28px; height: 28px; }
+.stat-value { font-size: 24px; font-weight: bold; color: #2c3e50; }
+.stat-label { font-size: 13px; color: #7f8c8d; margin-top: 4px; }
+.section-card { margin-bottom: 24px; }
+table { width: 100%; }
+.alert-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid #eee; }
+.alert-info { display: flex; flex-direction: column; gap: 4px; }
+.alert-badge { padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; }
+.alert-badge.critical { background: #dc3545; color: white; }
+.alert-badge.low { background: #ffc107; color: #333; }
+.loading-spinner { display: flex; justify-content: center; padding: 60px; }

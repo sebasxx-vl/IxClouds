@@ -1,0 +1,9 @@
+<mat-toolbar color="primary" class="toolbar">
+  <span class="logo">IxClouds - Inventario y Ventas</span>
+  <span class="spacer"></span>
+  <span class="admin-badge">Administrador</span>
+</mat-toolbar>
+<mat-sidenav-container class="sidenav-container">
+  <mat-sidenav mode="side" opened class="sidenav"><app-sidebar></app-sidebar></mat-sidenav>
+  <mat-sidenav-content class="content"><router-outlet></router-outlet></mat-sidenav-content>
+</mat-sidenav-container>

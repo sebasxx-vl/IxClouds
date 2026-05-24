@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="IxCloud.DataAccess/IxCloud.DataAccess.csproj" />
+  <Project Path="IxClouds.API/IxClouds.API.csproj" />
+  <Project Path="IxClouds.Domain/IxClouds.Domain.csproj" />
+</Solution>
