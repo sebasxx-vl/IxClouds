@@ -1,42 +1,113 @@
+<!-- inventory.component.html -->
 <div class="inventory-container">
-  <div class="header">
-    <h1>Inventario de Productos</h1>
-    <button mat-raised-button color="primary" (click)="openProductForm()"><mat-icon>add</mat-icon> Agregar Producto</button>
+
+  <!-- Header -->
+  <div class="page-header">
+    <div>
+      <h1>Inventario</h1>
+      <p class="page-sub">{{ filteredProducts.length }} productos encontrados</p>
+    </div>
+    <button mat-raised-button color="primary" (click)="openProductForm()">
+      <mat-icon>add</mat-icon>
+      Agregar producto
+    </button>
   </div>
-  <div class="filters">
-    <mat-form-field appearance="outline" class="search-field">
-      <mat-label>Buscar productos</mat-label>
-      <input matInput [(ngModel)]="searchTerm" (ngModelChange)="applyFilters()" placeholder="Marca, modelo o material">
-      <mat-icon matSuffix>search</mat-icon>
-    </mat-form-field>
-    <mat-form-field appearance="outline" class="status-filter">
-      <mat-label>Estado de Stock</mat-label>
-      <mat-select [(value)]="selectedStatus" (selectionChange)="applyFilters()">
-        <mat-option value="all">Todos</mat-option>
-        <mat-option value="critical">Critico (0-2)</mat-option>
-        <mat-option value="low">Bajo (3-10)</mat-option>
-        <mat-option value="normal">Normal (10+)</mat-option>
-      </mat-select>
-    </mat-form-field>
+
+  <!-- Filtros -->
+  <div class="filters-row">
+    <div class="search-wrap">
+      <mat-icon class="search-icon">search</mat-icon>
+      <input
+        class="search-input"
+        [(ngModel)]="searchTerm"
+        (ngModelChange)="applyFilters()"
+        placeholder="Buscar por marca, modelo o material…"
+      />
+    </div>
+
+    <div class="filter-tabs">
+      <button
+        *ngFor="let tab of statusTabs"
+        class="filter-tab"
+        [class.active]="selectedStatus === tab.value"
+        (click)="setStatus(tab.value)"
+      >
+        {{ tab.label }}
+      </button>
+    </div>
   </div>
-  <div *ngIf="loading" class="loading-spinner"><mat-spinner diameter="50"></mat-spinner></div>
-  <div *ngIf="!loading && filteredProducts.length === 0" class="no-data"><mat-icon>inventory</mat-icon><p>No se encontraron productos</p></div>
-  <div class="products-grid" *ngIf="!loading && filteredProducts.length > 0">
-    <mat-card *ngFor="let product of filteredProducts" class="product-card">
-      <img mat-card-image [src]="product.imageUrl || 'assets/default.png'" [alt]="product.brand">
-      <mat-card-header>
-        <mat-card-title>{{ product.brand }} {{ product.phoneModel }}</mat-card-title>
-        <mat-card-subtitle>{{ product.material }} | {{ product.gender }}</mat-card-subtitle>
-      </mat-card-header>
-      <mat-card-content>
-        <div class="detail-item"><span class="label">Stock:</span><span class="value" [ngClass]="getStockClass(product.stock)">{{ product.stock }}</span></div>
-        <div class="detail-item"><span class="label">Precio venta:</span><span class="value">{{ product.salePrice | currency:"COP":"symbol":"1.0-0" }}</span></div>
-        <div class="detail-item"><span class="label">Precio compra:</span><span class="value">{{ product.purchasePrice | currency:"COP":"symbol":"1.0-0" }}</span></div>
-      </mat-card-content>
-      <mat-card-actions>
-        <button mat-button color="primary" (click)="openProductForm(product)"><mat-icon>edit</mat-icon> Editar</button>
-        <button mat-button color="warn" (click)="deleteProduct(product.id)"><mat-icon>delete</mat-icon> Eliminar</button>
-      </mat-card-actions>
-    </mat-card>
+
+  <!-- Loader -->
+  <div *ngIf="loading" class="ix-loader">
+    <mat-spinner diameter="36"></mat-spinner>
   </div>
+
+  <!-- Empty -->
+  <div *ngIf="!loading && filteredProducts.length === 0" class="ix-empty">
+    <mat-icon>inventory_2</mat-icon>
+    <span class="empty-title">Sin resultados</span>
+    <span class="empty-sub">Prueba con otro término o agrega un producto nuevo</span>
+  </div>
+
+  <!-- Grid de productos -->
+  <div class="products-grid stagger" *ngIf="!loading && filteredProducts.length > 0">
+    <div class="product-card" *ngFor="let p of filteredProducts">
+
+      <!-- Imagen -->
+      <div class="product-img-wrap">
+        <img
+          [src]="p.imageUrl || 'assets/default-product.png'"
+          [alt]="p.brand + ' ' + p.phoneModel"
+          class="product-img"
+          (error)="onImgError($event)"
+        />
+        <span
+          class="stock-pill"
+          [class.critical]="p.stock <= 2"
+          [class.low]="p.stock > 2 && p.stock <= 10"
+          [class.ok]="p.stock > 10"
+        >
+          {{ p.stock }} uds
+        </span>
+      </div>
+
+      <!-- Info -->
+      <div class="product-body">
+        <div class="product-header">
+          <p class="product-brand">{{ p.brand }}</p>
+          <p class="product-model">{{ p.phoneModel }}</p>
+        </div>
+
+        <div class="product-meta">
+          <span class="meta-chip">{{ p.material }}</span>
+          <span class="meta-chip">{{ p.gender }}</span>
+        </div>
+
+        <div class="product-prices">
+          <div class="price-row">
+            <span class="price-label">Precio venta</span>
+            <span class="price-val">{{ p.salePrice | currency:"COP":"symbol":"1.0-0" }}</span>
+          </div>
+          <div class="price-row muted">
+            <span class="price-label">Precio compra</span>
+            <span class="price-val">{{ p.purchasePrice | currency:"COP":"symbol":"1.0-0" }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Acciones -->
+      <div class="product-actions">
+        <button class="action-btn edit" (click)="openProductForm(p)">
+          <mat-icon>edit</mat-icon>
+          Editar
+        </button>
+        <button class="action-btn delete" (click)="deleteProduct(p.id)">
+          <mat-icon>delete_outline</mat-icon>
+          Eliminar
+        </button>
+      </div>
+
+    </div>
+  </div>
+
 </div>

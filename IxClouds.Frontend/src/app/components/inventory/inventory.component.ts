@@ -1,23 +1,24 @@
+// inventory.component.ts — reemplaza el tuyo
 import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, CurrencyPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { ProductService } from '../../services/product.service';
 import { Product } from '../../models/product.model';
 import { ProductFormComponent } from '../product-form/product-form.component';
+
 @Component({
   selector: 'app-inventory',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatCardModule, MatButtonModule, MatIconModule, MatFormFieldModule, MatInputModule, MatSelectModule, MatProgressSpinnerModule, MatDialogModule],
+  imports: [
+    CommonModule, CurrencyPipe, FormsModule,
+    MatButtonModule, MatIconModule, MatProgressSpinnerModule, MatDialogModule
+  ],
   templateUrl: './inventory.component.html',
-  styleUrls: ['./inventory.component.css']
+  styleUrls: ['./inventory.component.scss']
 })
 export class InventoryComponent implements OnInit {
   products: Product[] = [];
@@ -25,30 +26,71 @@ export class InventoryComponent implements OnInit {
   loading = true;
   searchTerm = '';
   selectedStatus = 'all';
-  constructor(private productService: ProductService, private dialog: MatDialog) {}
+
+  statusTabs = [
+    { label: 'Todos',             value: 'all' },
+    { label: 'Normal',            value: 'normal' },
+    { label: 'Stock bajo',        value: 'low' },
+    { label: 'Crítico',           value: 'critical' },
+  ];
+
+  constructor(
+    private productService: ProductService,
+    private dialog: MatDialog
+  ) {}
+
   ngOnInit(): void { this.loadProducts(); }
+
   loadProducts(): void {
+    this.loading = true;
     this.productService.getAllProducts().subscribe({
       next: (data) => { this.products = data; this.applyFilters(); this.loading = false; },
       error: () => { this.loading = false; }
     });
   }
+
+  setStatus(value: string): void {
+    this.selectedStatus = value;
+    this.applyFilters();
+  }
+
   applyFilters(): void {
     this.filteredProducts = this.products.filter(p => {
-      const matchSearch = !this.searchTerm || p.brand.toLowerCase().includes(this.searchTerm.toLowerCase()) || p.phoneModel.toLowerCase().includes(this.searchTerm.toLowerCase()) || p.material.toLowerCase().includes(this.searchTerm.toLowerCase());
-      const matchStatus = this.selectedStatus === 'all' || (this.selectedStatus === 'critical' && p.stock <= 2) || (this.selectedStatus === 'low' && p.stock > 2 && p.stock <= 10) || (this.selectedStatus === 'normal' && p.stock > 10);
+      const term = this.searchTerm.toLowerCase();
+      const matchSearch = !term ||
+        p.brand.toLowerCase().includes(term) ||
+        p.phoneModel.toLowerCase().includes(term) ||
+        p.material.toLowerCase().includes(term);
+
+      const matchStatus =
+        this.selectedStatus === 'all' ||
+        (this.selectedStatus === 'critical' && p.stock <= 2) ||
+        (this.selectedStatus === 'low'      && p.stock > 2 && p.stock <= 10) ||
+        (this.selectedStatus === 'normal'   && p.stock > 10);
+
       return matchSearch && matchStatus;
     });
   }
+
   openProductForm(product?: Product): void {
-    const ref = this.dialog.open(ProductFormComponent, { width: '600px', data: product || null });
+    const ref = this.dialog.open(ProductFormComponent, {
+      width: '600px',
+      maxHeight: '90vh',
+      data: product || null
+    });
     ref.afterClosed().subscribe(result => { if (result) this.loadProducts(); });
   }
+
   deleteProduct(id: number): void {
-    if (confirm('Eliminar este producto?')) {
+    if (confirm('¿Eliminar este producto? Esta acción no se puede deshacer.')) {
       this.productService.deleteProduct(id).subscribe(() => this.loadProducts());
     }
   }
+
+  onImgError(event: Event): void {
+    (event.target as HTMLImageElement).src = 'assets/default-product.png';
+  }
+
   getStockClass(stock: number): string {
     if (stock <= 2) return 'critical';
     if (stock <= 10) return 'low';

@@ -1,0 +1,57 @@
+<!-- sidebar.component.html -->
+<aside class="sidebar">
+
+  <!-- Logo -->
+  <div class="sidebar-logo">
+    <div class="logo-icon">
+      <mat-icon>cloud</mat-icon>
+    </div>
+    <div class="logo-text">
+      <span class="logo-name">IxClouds</span>
+      <span class="logo-tag">Gestión empresarial</span>
+    </div>
+  </div>
+
+  <!-- Navegación principal -->
+  <nav class="sidebar-nav">
+    <span class="nav-section-label">Principal</span>
+
+    <a
+      *ngFor="let item of navItems"
+      class="nav-item"
+      [routerLink]="item.route"
+      routerLinkActive="active"
+    >
+      <mat-icon class="nav-icon">{{ item.icon }}</mat-icon>
+      <span class="nav-label">{{ item.label }}</span>
+      <span class="nav-badge" *ngIf="item.badge && alertCount > 0">
+        {{ alertCount }}
+      </span>
+    </a>
+
+    <span class="nav-section-label" style="margin-top: 10px">Análisis</span>
+
+    <a
+      *ngFor="let item of reportItems"
+      class="nav-item"
+      [routerLink]="item.route"
+      routerLinkActive="active"
+    >
+      <mat-icon class="nav-icon">{{ item.icon }}</mat-icon>
+      <span class="nav-label">{{ item.label }}</span>
+    </a>
+  </nav>
+
+  <!-- Footer usuario -->
+  <div class="sidebar-footer">
+    <div class="user-row">
+      <div class="user-avatar">AD</div>
+      <div class="user-info">
+        <span class="user-name">Administrador</span>
+        <span class="user-role">Admin · IxClouds</span>
+      </div>
+      <mat-icon class="settings-btn">settings</mat-icon>
+    </div>
+  </div>
+
+</aside>

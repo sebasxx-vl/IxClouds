@@ -23,7 +23,7 @@ export class SalesComponent implements OnInit {
   filteredSales: Sale[] = [];
   loading = true;
   searchTerm = '';
-  displayedColumns = ['id', 'date', 'total', 'actions'];
+  displayedColumns = ['id', 'date', 'items', 'total', 'actions'];
   constructor(private saleService: SaleService, private dialog: MatDialog) {}
   ngOnInit(): void { this.loadSales(); }
   loadSales(): void {
@@ -38,4 +38,12 @@ export class SalesComponent implements OnInit {
     ref.afterClosed().subscribe(result => { if (result) this.loadSales(); });
   }
   formatDate(date: Date): string { return new Date(date).toLocaleString('es-CO'); }
+
+  viewSale(sale:Sale): void {
+    console.log(sale);
+  }
+
+  get grandTotal(): number {
+    return this.filteredSales.reduce((sum, s) => sum + s.total, 0);
+  }
 }

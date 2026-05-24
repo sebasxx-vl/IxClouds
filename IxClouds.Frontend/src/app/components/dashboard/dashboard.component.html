@@ -1,33 +1,154 @@
+<!-- dashboard.component.html -->
 <div class="dashboard-container">
-  <h1>Dashboard</h1>
-  <div *ngIf="loading" class="loading-spinner"><mat-spinner diameter="50"></mat-spinner></div>
-  <div *ngIf="!loading && stats">
-    <div class="stats-grid">
-      <mat-card class="stat-card"><mat-card-content><div class="stat-icon"><mat-icon>attach_money</mat-icon></div><div class="stat-info"><div class="stat-value">{{ stats.totalSalesAmount | currency:"COP":"symbol":"1.0-0" }}</div><div class="stat-label">Ventas Totales</div></div></mat-card-content></mat-card>
-      <mat-card class="stat-card"><mat-card-content><div class="stat-icon"><mat-icon>today</mat-icon></div><div class="stat-info"><div class="stat-value">{{ stats.todaySalesAmount | currency:"COP":"symbol":"1.0-0" }}</div><div class="stat-label">Ventas de Hoy</div></div></mat-card-content></mat-card>
-      <mat-card class="stat-card"><mat-card-content><div class="stat-icon"><mat-icon>inventory</mat-icon></div><div class="stat-info"><div class="stat-value">{{ stats.totalInventoryCount }}</div><div class="stat-label">Total Inventario</div></div></mat-card-content></mat-card>
-      <mat-card class="stat-card"><mat-card-content><div class="stat-icon"><mat-icon>receipt</mat-icon></div><div class="stat-info"><div class="stat-value">{{ stats.totalSalesCount }}</div><div class="stat-label">Ventas Realizadas</div></div></mat-card-content></mat-card>
+
+  <!-- Header -->
+  <div class="page-header">
+    <div>
+      <h1>Dashboard</h1>
+      <p class="page-sub">Resumen general del negocio</p>
     </div>
-    <mat-card class="section-card">
-      <mat-card-header><mat-card-title>Productos Mas Vendidos</mat-card-title></mat-card-header>
-      <mat-card-content>
-        <table mat-table [dataSource]="stats.bestSellingProducts">
-          <ng-container matColumnDef="product"><th mat-header-cell *matHeaderCellDef>Producto</th><td mat-cell *matCellDef="let p">{{ p.productName }}</td></ng-container>
-          <ng-container matColumnDef="quantity"><th mat-header-cell *matHeaderCellDef>Cantidad</th><td mat-cell *matCellDef="let p">{{ p.totalSold }}</td></ng-container>
-          <ng-container matColumnDef="revenue"><th mat-header-cell *matHeaderCellDef>Ingresos</th><td mat-cell *matCellDef="let p">{{ p.totalRevenue | currency:"COP":"symbol":"1.0-0" }}</td></ng-container>
-          <tr mat-header-row *matHeaderRowDef="['product','quantity','revenue']"></tr>
-          <tr mat-row *matRowDef="let row; columns: ['product','quantity','revenue']"></tr>
-        </table>
-      </mat-card-content>
-    </mat-card>
-    <mat-card class="section-card" *ngIf="stats.lowStockProducts.length > 0">
-      <mat-card-header><mat-card-title>Alertas de Bajo Stock</mat-card-title></mat-card-header>
-      <mat-card-content>
-        <div class="alert-item" *ngFor="let p of stats.lowStockProducts">
-          <div class="alert-info"><strong>{{ p.brand }} {{ p.phoneModel }}</strong><span>Stock: {{ p.stock }}</span></div>
-          <div class="alert-badge" [ngClass]="getStatusClass(p.stock)">{{ p.stock <= 2 ? "CRITICO" : "BAJO" }}</div>
-        </div>
-      </mat-card-content>
-    </mat-card>
+    <div class="header-actions">
+      <span class="today-date">{{ today | date:"EEEE, d 'de' MMMM" : '' : 'es' }}</span>
+    </div>
   </div>
+
+  <!-- Loader -->
+  <div *ngIf="loading" class="ix-loader">
+    <mat-spinner diameter="36"></mat-spinner>
+  </div>
+
+  <ng-container *ngIf="!loading && stats">
+
+    <!-- KPI Grid -->
+    <div class="kpi-grid stagger">
+
+      <div class="kpi-card">
+        <div class="kpi-icon blue">
+          <mat-icon>payments</mat-icon>
+        </div>
+        <div class="kpi-info">
+          <span class="kpi-val">{{ stats.totalSalesAmount | currency:"COP":"symbol":"1.0-0" }}</span>
+          <span class="kpi-label">Total en ventas</span>
+        </div>
+        <div class="kpi-accent blue"></div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-icon green">
+          <mat-icon>today</mat-icon>
+        </div>
+        <div class="kpi-info">
+          <span class="kpi-val">{{ stats.todaySalesAmount | currency:"COP":"symbol":"1.0-0" }}</span>
+          <span class="kpi-label">Ventas hoy</span>
+        </div>
+        <div class="kpi-accent green"></div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-icon amber">
+          <mat-icon>inventory_2</mat-icon>
+        </div>
+        <div class="kpi-info">
+          <span class="kpi-val">{{ stats.totalInventoryCount | number }}</span>
+          <span class="kpi-label">Productos activos</span>
+        </div>
+        <div class="kpi-accent amber"></div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-icon red">
+          <mat-icon>shopping_bag</mat-icon>
+        </div>
+        <div class="kpi-info">
+          <span class="kpi-val">{{ stats.totalSalesCount | number }}</span>
+          <span class="kpi-label">Ventas totales</span>
+        </div>
+        <div class="kpi-accent red"></div>
+      </div>
+
+    </div>
+
+    <!-- Fila inferior: Best sellers + Low stock -->
+    <div class="bottom-grid">
+
+      <!-- Más vendidos -->
+      <div class="ix-section">
+        <div class="ix-section__header">
+          <div class="section-icon blue">
+            <mat-icon>emoji_events</mat-icon>
+          </div>
+          <h3>Productos más vendidos</h3>
+          <a class="section-link" routerLink="/sales">Ver ventas →</a>
+        </div>
+
+        <div *ngIf="stats.bestSellingProducts.length === 0" class="ix-empty">
+          <mat-icon>bar_chart</mat-icon>
+          <span class="empty-title">Sin datos aún</span>
+          <span class="empty-sub">Las ventas aparecerán aquí</span>
+        </div>
+
+        <table class="mat-mdc-table" *ngIf="stats.bestSellingProducts.length > 0">
+          <thead>
+            <tr class="mat-mdc-header-row">
+              <th class="mat-mdc-header-cell">#</th>
+              <th class="mat-mdc-header-cell">Producto</th>
+              <th class="mat-mdc-header-cell">Unidades</th>
+              <th class="mat-mdc-header-cell">Ingresos</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="mat-mdc-row" *ngFor="let p of stats.bestSellingProducts; let i = index">
+              <td class="mat-mdc-cell rank-cell">
+                <span class="rank" [class.gold]="i===0" [class.silver]="i===1" [class.bronze]="i===2">
+                  {{ i + 1 }}
+                </span>
+              </td>
+              <td class="mat-mdc-cell">
+                <span class="product-name">{{ p.productName }}</span>
+              </td>
+              <td class="mat-mdc-cell">
+                <span class="ix-badge info">{{ p.totalSold }} uds</span>
+              </td>
+              <td class="mat-mdc-cell revenue-cell">
+                {{ p.totalRevenue | currency:"COP":"symbol":"1.0-0" }}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Stock crítico -->
+      <div class="ix-section">
+        <div class="ix-section__header">
+          <div class="section-icon red">
+            <mat-icon>warning_amber</mat-icon>
+          </div>
+          <h3>Stock crítico</h3>
+          <a class="section-link" routerLink="/alerts">Ver alertas →</a>
+        </div>
+
+        <div *ngIf="stats.lowStockProducts.length === 0" class="ix-empty">
+          <mat-icon>check_circle</mat-icon>
+          <span class="empty-title">Todo en orden</span>
+          <span class="empty-sub">No hay productos con stock bajo</span>
+        </div>
+
+        <div class="stock-list" *ngIf="stats.lowStockProducts.length > 0">
+          <div class="stock-item" *ngFor="let p of stats.lowStockProducts">
+            <div class="stock-dot" [class.critical]="p.stock <= 2" [class.low]="p.stock > 2"></div>
+            <div class="stock-info">
+              <span class="stock-name">{{ p.brand }} {{ p.phoneModel }}</span>
+              <span class="stock-material">{{ p.material }}</span>
+            </div>
+            <span class="ix-badge" [class.danger]="p.stock <= 2" [class.warning]="p.stock > 2">
+              {{ p.stock }} uds
+            </span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </ng-container>
+
 </div>
