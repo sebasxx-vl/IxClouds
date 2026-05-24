@@ -18,7 +18,7 @@ import { DashboardStats } from '../../models/dashboard.model';
     MatCardModule, MatIconModule, MatProgressSpinnerModule, MatTableModule
   ],
   templateUrl: './dashboard.component.html',
-  styleUrls: ['./dashboard.component.scss']
+  styleUrls: ['./dashboard.component.css']
 })
 export class DashboardComponent implements OnInit {
   stats: DashboardStats | null = null;

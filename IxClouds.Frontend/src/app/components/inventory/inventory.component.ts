@@ -18,7 +18,7 @@ import { ProductFormComponent } from '../product-form/product-form.component';
     MatButtonModule, MatIconModule, MatProgressSpinnerModule, MatDialogModule
   ],
   templateUrl: './inventory.component.html',
-  styleUrls: ['./inventory.component.scss']
+  styleUrls: ['./inventory.component.css']
 })
 export class InventoryComponent implements OnInit {
   products: Product[] = [];
