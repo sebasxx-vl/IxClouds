@@ -1,32 +1,178 @@
+using IxClouds.API.DTOs.Response;
+using IxClouds.API.Services;
+using IxClouds.DataAccess;
 using IxClouds.Domain.Entities;
-using IxClouds.Domain.Enums;
-using IxClouds.Domain.Interfaces.Repositories;
-using IxClouds.Domain.Interfaces.Service;
-namespace IxClouds.Domain.Service;
-public class ProductService : IProductService
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+
+namespace IxClouds.API.Services
 {
-    private readonly IProductRepository _productRepository;
-    public ProductService(IProductRepository productRepository) { _productRepository = productRepository; }
-    public async Task<IEnumerable<Product>> GetAllProductsAsync() => await _productRepository.GetAllAsync();
-    public async Task<Product?> GetProductByIdAsync(int id) => await _productRepository.GetByIdAsync(id);
-    public async Task<Product> CreateProductAsync(Product product) { product.CreatedAt = DateTime.Now; return await _productRepository.CreateAsync(product); }
-    public async Task UpdateProductAsync(Product product) => await _productRepository.UpdateAsync(product);
-    public async Task DeleteProductAsync(int id) => await _productRepository.DeleteAsync(id);
-    public async Task<IEnumerable<Product>> SearchProductsAsync(string? brand, string? phoneModel, string? material, string? gender) => await _productRepository.SearchAsync(brand, phoneModel, material, gender);
-    public async Task<bool> UpdateStockAsync(int productId, int quantityToSubtract)
+    public class ProductService : IProductService
     {
-        var product = await _productRepository.GetByIdAsync(productId);
-        if (product == null || product.Stock < quantityToSubtract) return false;
-        product.Stock -= quantityToSubtract;
-        await _productRepository.UpdateAsync(product);
-        return true;
+        private readonly ApplicationDbContext _context;
+        private readonly ILogger<ProductService> _logger;
+
+        public ProductService(ApplicationDbContext context, ILogger<ProductService> logger)
+        {
+            _context = context;
+            _logger = logger;
+        }
+
+        public async Task<ProductResponseDto> CreateAsync(CreateProductRequestDto dto)
+        {
+            // Verificar SKU único
+            if (await _context.Products.AnyAsync(p => p.Sku == dto.Sku))
+                throw new InvalidOperationException($"Ya existe un producto con el SKU: {dto.Sku}");
+
+            var product = new Product
+            {
+                Name = dto.Name,
+                Description = dto.Description,
+                Sku = dto.Sku,
+                Price = dto.Price,
+                Cost = dto.Cost,
+                StockQuantity = dto.StockQuantity,
+                MinStockLevel = dto.MinStockLevel,
+                Category = dto.Category,
+                ImageUrl = dto.ImageUrl,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            };
+
+            _context.Products.Add(product);
+            await _context.SaveChangesAsync();
+
+            _logger.LogInformation("Producto creado: {Sku} - {Name}", product.Sku, product.Name);
+
+            return MapToDto(product);
+        }
+
+        public async Task<ProductResponseDto> UpdateAsync(int id, UpdateProductRequestDto dto)
+        {
+            var product = await _context.Products.FindAsync(id);
+            if (product == null)
+                throw new KeyNotFoundException($"Producto ID {id} no encontrado");
+
+            // Verificar SKU único (excluyendo el actual)
+            if (await _context.Products.AnyAsync(p => p.Sku == dto.Sku && p.Id != id))
+                throw new InvalidOperationException($"Ya existe otro producto con el SKU: {dto.Sku}");
+
+            product.Name = dto.Name;
+            product.Description = dto.Description;
+            product.Sku = dto.Sku;
+            product.Price = dto.Price;
+            product.Cost = dto.Cost;
+            product.StockQuantity = dto.StockQuantity;
+            product.MinStockLevel = dto.MinStockLevel;
+            product.Category = dto.Category;
+            product.ImageUrl = dto.ImageUrl;
+            product.IsActive = dto.IsActive;
+            product.UpdatedAt = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync();
+
+            _logger.LogInformation("Producto actualizado: {Sku}", product.Sku);
+
+            return MapToDto(product);
+        }
+
+        public async Task<bool> DeleteAsync(int id)
+        {
+            var product = await _context.Products.FindAsync(id);
+            if (product == null) return false;
+
+            // Soft delete - marcar como inactivo en lugar de eliminar
+            product.IsActive = false;
+            product.UpdatedAt = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync();
+
+            _logger.LogInformation("Producto desactivado: {Sku}", product.Sku);
+
+            return true;
+        }
+
+        public async Task<ProductResponseDto?> GetByIdAsync(int id)
+        {
+            var product = await _context.Products.FindAsync(id);
+            return product == null ? null : MapToDto(product);
+        }
+
+        public async Task<PaginatedResponse<ProductResponseDto>> SearchAsync(SearchProductRequestDto filter)
+        {
+            var query = _context.Products.AsQueryable();
+
+            // Filtros
+            if (!string.IsNullOrWhiteSpace(filter.SearchTerm))
+            {
+                var term = filter.SearchTerm.ToLower();
+                query = query.Where(p =>
+                    p.Name.ToLower().Contains(term) ||
+                    p.Sku.ToLower().Contains(term) ||
+                    p.Description.ToLower().Contains(term));
+            }
+
+            if (!string.IsNullOrWhiteSpace(filter.Category))
+                query = query.Where(p => p.Category == filter.Category);
+
+            if (filter.MinPrice.HasValue)
+                query = query.Where(p => p.Price >= filter.MinPrice.Value);
+
+            if (filter.MaxPrice.HasValue)
+                query = query.Where(p => p.Price <= filter.MaxPrice.Value);
+
+            if (filter.LowStockOnly.HasValue && filter.LowStockOnly.Value)
+                query = query.Where(p => p.StockQuantity <= p.MinStockLevel);
+
+            if (filter.IsActive.HasValue)
+                query = query.Where(p => p.IsActive == filter.IsActive.Value);
+
+            // Ordenamiento
+            query = filter.SortBy?.ToLower() switch
+            {
+                "price" => filter.SortDescending ? query.OrderByDescending(p => p.Price) : query.OrderBy(p => p.Price),
+                "stock" => filter.SortDescending ? query.OrderByDescending(p => p.StockQuantity) : query.OrderBy(p => p.StockQuantity),
+                "date" => filter.SortDescending ? query.OrderByDescending(p => p.CreatedAt) : query.OrderBy(p => p.CreatedAt),
+                _ => filter.SortDescending ? query.OrderByDescending(p => p.Name) : query.OrderBy(p => p.Name)
+            };
+
+            var totalCount = await query.CountAsync();
+
+            var items = await query
+                .Skip((filter.PageNumber - 1) * filter.PageSize)
+                .Take(filter.PageSize)
+                .ToListAsync();
+
+            return new PaginatedResponse<ProductResponseDto>
+            {
+                Items = items.Select(MapToDto).ToList(),
+                TotalCount = totalCount,
+                PageNumber = filter.PageNumber,
+                PageSize = filter.PageSize
+            };
+        }
+
+        private static ProductResponseDto MapToDto(Product product)
+        {
+            return new ProductResponseDto
+            {
+                Id = product.Id,
+                Name = product.Name,
+                Description = product.Description,
+                Sku = product.Sku,
+                Price = product.Price,
+                Cost = product.Cost,
+                StockQuantity = product.StockQuantity,
+                MinStockLevel = product.MinStockLevel,
+                Category = product.Category,
+                ImageUrl = product.ImageUrl,
+                IsActive = product.IsActive,
+                HasLowStock = product.StockQuantity <= product.MinStockLevel,
+                ProfitMargin = product.Price > 0 ? ((product.Price - product.Cost) / product.Price) * 100 : 0,
+                CreatedAt = product.CreatedAt,
+                UpdatedAt = product.UpdatedAt
+            };
+        }
     }
-    public async Task<StockStatus> GetStockStatusAsync(int productId)
-    {
-        var product = await _productRepository.GetByIdAsync(productId);
-        if (product == null) return StockStatus.Critical;
-        return product.Stock switch { <= 2 => StockStatus.Critical, <= 10 => StockStatus.Low, _ => StockStatus.Normal };
-    }
-    public async Task<IEnumerable<Product>> GetLowStockProductsAsync() { var all = await _productRepository.GetAllAsync(); return all.Where(p => p.Stock <= 10); }
-    public async Task<int> GetTotalInventoryCountAsync() => await _productRepository.GetTotalStockAsync();
 }

@@ -1,18 +1,52 @@
-using AutoMapper;
 using IxClouds.API.DTOs.Request;
 using IxClouds.API.DTOs.Response;
-using IxClouds.Domain.Entities;
-using IxClouds.Domain.Interfaces.Service;
+using IxClouds.API.Services;
 using Microsoft.AspNetCore.Mvc;
-namespace IxClouds.API.Controllers;
-[Route("api/[controller]")]
-[ApiController]
-public class SalesController : ControllerBase
+
+namespace IxClouds.API.Controllers
 {
-    private readonly ISaleService _saleService;
-    private readonly IMapper _mapper;
-    public SalesController(ISaleService saleService, IMapper mapper) { _saleService = saleService; _mapper = mapper; }
-    [HttpPost] public async Task<ActionResult<SaleResponseDto>> CreateSale([FromBody] CreateSaleRequestDto dto) { if (!ModelState.IsValid) return BadRequest(ModelState); var items = dto.Items.Select(i => (i.ProductId, i.Quantity)).ToList(); try { var sale = await _saleService.RegisterSaleAsync(new Sale(), items); return Ok(_mapper.Map<SaleResponseDto>(sale)); } catch (Exception ex) { return BadRequest(ex.Message); } }
-    [HttpGet] public async Task<ActionResult<IEnumerable<SaleResponseDto>>> GetAllSales() { var sales = await _saleService.GetAllSalesAsync(); return Ok(_mapper.Map<IEnumerable<SaleResponseDto>>(sales)); }
-    [HttpGet("{id}")] public async Task<ActionResult<SaleResponseDto>> GetSaleById(int id) { var sale = await _saleService.GetSaleByIdAsync(id); if (sale == null) return NotFound(); return Ok(_mapper.Map<SaleResponseDto>(sale)); }
+    [ApiController]
+    [Route("api/[controller]")]
+    public class SalesController : ControllerBase
+    {
+        private readonly ISaleService _saleService;
+
+        public SalesController(ISaleService saleService)
+        {
+            _saleService = saleService;
+        }
+
+        [HttpGet]
+        public async Task<ActionResult<List<SaleResponseDto>>> GetAll(
+            [FromQuery] DateTime? fromDate,
+            [FromQuery] DateTime? toDate)
+        {
+            var sales = await _saleService.GetSalesAsync(fromDate, toDate);
+            return Ok(sales);
+        }
+
+        [HttpGet("{id:int}")]
+        public async Task<ActionResult<SaleResponseDto>> GetById(int id)
+        {
+            var sale = await _saleService.GetSaleByIdAsync(id);
+            if (sale == null) return NotFound(new { message = $"Venta ID {id} no encontrada" });
+            return Ok(sale);
+        }
+
+        [HttpPost]
+        public async Task<ActionResult<SaleResponseDto>> Create([FromBody] CreateSaleRequestDto dto)
+        {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            try
+            {
+                var sale = await _saleService.CreateSaleAsync(dto);
+                return CreatedAtAction(nameof(GetById), new { id = sale.Id }, sale);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+    }
 }

@@ -1,15 +1,21 @@
-namespace IxClouds.API.DTOs.Response;
-public class ProductResponseDto
+namespace IxClouds.API.DTOs.Response
 {
-    public int Id { get; set; }
-    public string Brand { get; set; } = string.Empty;
-    public string PhoneModel { get; set; } = string.Empty;
-    public string Gender { get; set; } = string.Empty;
-    public string Material { get; set; } = string.Empty;
-    public int Stock { get; set; }
-    public decimal PurchasePrice { get; set; }
-    public decimal SalePrice { get; set; }
-    public string ImageUrl { get; set; } = string.Empty;
-    public DateTime CreatedAt { get; set; }
-    public string StockStatus { get; set; } = string.Empty;
+    public class ProductResponseDto
+    {
+        public int Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
+        public string Sku { get; set; } = string.Empty;
+        public decimal Price { get; set; }
+        public decimal Cost { get; set; }
+        public int StockQuantity { get; set; }
+        public int MinStockLevel { get; set; }
+        public string Category { get; set; } = string.Empty;
+        public string ImageUrl { get; set; } = string.Empty;
+        public bool IsActive { get; set; }
+        public bool HasLowStock { get; set; }
+        public decimal ProfitMargin { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public DateTime UpdatedAt { get; set; }
+    }
 }

@@ -1,45 +1,77 @@
 using IxClouds.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
-namespace IxCloud.DataAccess.Context;
-public class ApplicationDbContext : DbContext
+using Microsoft.Extensions.Options;
+
+namespace IxClouds.DataAccess
 {
-    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
-    public DbSet<Product> Products { get; set; }
-    public DbSet<Sale> Sales { get; set; }
-    public DbSet<SaleDetail> SaleDetails { get; set; }
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    public class ApplicationDbContext : DbContext
     {
-        base.OnModelCreating(modelBuilder);
-        modelBuilder.Entity<Product>(entity =>
+        public ApplicationDbContext(DbContextOptions<<ApplicationDbContext> options) : base(options) { }
+
+        public DbSet<Product> Products => Set<Product>();
+        public DbSet<Sale> Sales => Set<Sale>();
+        public DbSet<SaleItem> SaleItems => Set<SaleItem>();
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            entity.HasKey(e => e.Id);
-            entity.Property(e => e.Brand).IsRequired().HasMaxLength(100);
-            entity.Property(e => e.PhoneModel).IsRequired().HasMaxLength(100);
-            entity.Property(e => e.Gender).HasMaxLength(20);
-            entity.Property(e => e.Material).HasMaxLength(50);
-            entity.Property(e => e.Stock).HasDefaultValue(0);
-            entity.Property(e => e.PurchasePrice).HasPrecision(18, 2);
-            entity.Property(e => e.SalePrice).HasPrecision(18, 2);
-            entity.Property(e => e.ImageUrl).HasMaxLength(500);
-            entity.Property(e => e.CreatedAt).HasDefaultValueSql("GETDATE()");
-        });
-        modelBuilder.Entity<Sale>(entity =>
+            modelBuilder.Entity<Product>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.HasIndex(e => e.Sku).IsUnique();
+                entity.Property(e => e.Price).HasPrecision(18, 2);
+                entity.Property(e => e.Cost).HasPrecision(18, 2);
+                entity.Property(e => e.Name).HasMaxLength(100).IsRequired();
+                entity.Property(e => e.Sku).HasMaxLength(50).IsRequired();
+                entity.Property(e => e.Category).HasMaxLength(50);
+            });
+
+            modelBuilder.Entity<Sale>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.TotalAmount).HasPrecision(18, 2);
+                entity.Property(e => e.Discount).HasPrecision(18, 2);
+                entity.Property(e => e.FinalAmount).HasPrecision(18, 2);
+                entity.Property(e => e.InvoiceNumber).HasMaxLength(50).IsRequired();
+                entity.HasIndex(e => e.SaleDate);
+                entity.HasIndex(e => e.InvoiceNumber).IsUnique();
+            });
+
+            modelBuilder.Entity<SaleItem>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.UnitPrice).HasPrecision(18, 2);
+                entity.Property(e => e.TotalPrice).HasPrecision(18, 2);
+                entity.HasOne(e => e.Product)
+                      .WithMany(p => p.SaleItems)
+                      .HasForeignKey(e => e.ProductId)
+                      .OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne(e => e.Sale)
+                      .WithMany(s => s.Items)
+                      .HasForeignKey(e => e.SaleId)
+                      .OnDelete(DeleteBehavior.Cascade);
+            });
+        }
+
+        public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
-            entity.HasKey(e => e.Id);
-            entity.Property(e => e.Date).HasDefaultValueSql("GETDATE()");
-            entity.Property(e => e.Total).HasPrecision(18, 2);
-        });
-        modelBuilder.Entity<SaleDetail>(entity =>
-        {
-            entity.HasKey(e => e.Id);
-            entity.Property(e => e.UnitPrice).HasPrecision(18, 2);
-            entity.Property(e => e.Subtotal).HasPrecision(18, 2);
-            entity.HasOne(d => d.Sale).WithMany(s => s.SaleDetails).HasForeignKey(d => d.SaleId).OnDelete(DeleteBehavior.Cascade);
-            entity.HasOne(d => d.Product).WithMany(p => p.SaleDetails).HasForeignKey(d => d.ProductId).OnDelete(DeleteBehavior.Restrict);
-        });
-        modelBuilder.Entity<Product>().HasIndex(p => p.Brand);
-        modelBuilder.Entity<Product>().HasIndex(p => p.PhoneModel);
-        modelBuilder.Entity<Product>().HasIndex(p => p.Material);
-        modelBuilder.Entity<Sale>().HasIndex(s => s.Date);
+            var entries = ChangeTracker.Entries()
+                .Where(e => e.State == EntityState.Added || e.State == EntityState.Modified);
+
+            foreach (var entry in entries)
+            {
+                if (entry.Entity is Product product)
+                {
+                    if (entry.State == EntityState.Added)
+                        product.CreatedAt = DateTime.UtcNow;
+                    product.UpdatedAt = DateTime.UtcNow;
+                }
+                else if (entry.Entity is Sale sale && entry.State == EntityState.Added)
+                {
+                    sale.SaleDate = DateTime.UtcNow;
+                }
+            }
+
+            return await base.SaveChangesAsync(cancellationToken);
+        }
     }
 }

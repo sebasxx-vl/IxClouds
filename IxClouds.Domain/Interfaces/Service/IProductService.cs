@@ -1,16 +1,22 @@
-using IxClouds.Domain.Entities;
-using IxClouds.Domain.Enums;
-namespace IxClouds.Domain.Interfaces.Service;
-public interface IProductService
+namespace IxClouds.API.Services
 {
-    Task<IEnumerable<Product>> GetAllProductsAsync();
-    Task<Product?> GetProductByIdAsync(int id);
-    Task<Product> CreateProductAsync(Product product);
-    Task UpdateProductAsync(Product product);
-    Task DeleteProductAsync(int id);
-    Task<IEnumerable<Product>> SearchProductsAsync(string? brand, string? phoneModel, string? material, string? gender);
-    Task<bool> UpdateStockAsync(int productId, int quantityToSubtract);
-    Task<StockStatus> GetStockStatusAsync(int productId);
-    Task<IEnumerable<Product>> GetLowStockProductsAsync();
-    Task<int> GetTotalInventoryCountAsync();
+    public interface IProductService
+    {
+        Task<ProductResponseDto> CreateAsync(CreateProductRequestDto dto);
+        Task<ProductResponseDto> UpdateAsync(int id, UpdateProductRequestDto dto);
+        Task<bool> DeleteAsync(int id);
+        Task<ProductResponseDto?> GetByIdAsync(int id);
+        Task<PaginatedResponse<ProductResponseDto>> SearchAsync(SearchProductRequestDto filter);
+    }
+
+    public class PaginatedResponse<T>
+    {
+        public List<T> Items { get; set; } = new();
+        public int TotalCount { get; set; }
+        public int PageNumber { get; set; }
+        public int PageSize { get; set; }
+        public int TotalPages => (int)Math.Ceiling((double)TotalCount / PageSize);
+        public bool HasNextPage => PageNumber < TotalPages;
+        public bool HasPreviousPage => PageNumber > 1;
+    }
 }
