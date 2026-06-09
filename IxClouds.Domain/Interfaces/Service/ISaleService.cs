@@ -1,5 +1,5 @@
-using IxClouds.API.DTOs.Request;
-using IxClouds.API.DTOs.Response;
+using IxClouds.Domain.DTOs.Request;
+using IxClouds.Domain.DTOs.Response;
 
 namespace IxClouds.Domain.Interfaces.Services
 {

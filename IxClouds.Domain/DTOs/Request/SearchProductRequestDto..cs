@@ -1,4 +1,4 @@
-namespace IxClouds.API.DTOs.Request
+﻿namespace IxClouds.Domain.DTOs.Request
 {
     public class SearchProductRequestDto
     {

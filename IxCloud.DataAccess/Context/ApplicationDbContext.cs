@@ -2,15 +2,15 @@ using IxClouds.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
-namespace IxClouds.DataAccess
+namespace IxCloud.DataAccess
 {
     public class ApplicationDbContext : DbContext
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
 
-        public DbSet<Product> Products => Set<Product>();
-        public DbSet<Sale> Sales => Set<Sale>();
-        public DbSet<SaleItem> SaleItems => Set<SaleItem>();
+        public DbSet<Product> Products { get; set; } = null!;
+        public DbSet<Sale> Sales { get; set; } = null!;
+        public DbSet<SaleItem> SaleItems { get; set; } = null!;  // ← DbSet explícito
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -34,6 +34,11 @@ namespace IxClouds.DataAccess
                 entity.Property(e => e.InvoiceNumber).HasMaxLength(50).IsRequired();
                 entity.HasIndex(e => e.SaleDate);
                 entity.HasIndex(e => e.InvoiceNumber).IsUnique();
+
+                entity.HasMany(e => e.Items)
+                      .WithOne(si => si.Sale)  // ← SaleItem.Sale debe existir
+                      .HasForeignKey(si => si.SaleId)
+                      .OnDelete(DeleteBehavior.Cascade);
             });
 
             modelBuilder.Entity<SaleItem>(entity =>
@@ -41,14 +46,11 @@ namespace IxClouds.DataAccess
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.UnitPrice).HasPrecision(18, 2);
                 entity.Property(e => e.TotalPrice).HasPrecision(18, 2);
+
                 entity.HasOne(e => e.Product)
                       .WithMany(p => p.SaleItems)
                       .HasForeignKey(e => e.ProductId)
                       .OnDelete(DeleteBehavior.Restrict);
-                entity.HasOne(e => e.Sale)
-                      .WithMany(s => s.Items)
-                      .HasForeignKey(e => e.SaleId)
-                      .OnDelete(DeleteBehavior.Cascade);
             });
         }
 

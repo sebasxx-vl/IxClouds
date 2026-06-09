@@ -1,7 +1,7 @@
 using IxClouds.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
-namespace IxClouds.DataAccess
+namespace IxCloud.DataAccess
 {
     public static class DataSeeder
     {
@@ -106,7 +106,6 @@ namespace IxClouds.DataAccess
             await context.Products.AddRangeAsync(products);
             await context.SaveChangesAsync();
 
-            // Seed demo sales
             var random = new Random();
             var sales = new List<Sale>();
 

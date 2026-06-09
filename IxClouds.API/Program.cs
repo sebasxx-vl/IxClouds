@@ -1,39 +1,21 @@
-using IxCloud.DataAccess.Seeders;
-using IxCloud.DataAccess;                              // ← sin S
+using IxCloud.DataAccess;
 using IxClouds.API.Middleware;
-using IxClouds.Domain.Interfaces.Services;             // ← interfaces
-using IxClouds.Domain.Services;                        // ← servicios movidos a Domain
-using Microsoft.AspNetCore.Diagnostics;
+using IxClouds.Domain.Interfaces.Services;
+using IxClouds.Domain.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container
-builder.Services.AddControllers()
-    .ConfigureApiBehaviorOptions(options =>
-    {
-        options.SuppressModelStateInvalidFilter = false;
-    });
-
+builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(c =>
-{
-    c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
-    {
-        Title = "IxClouds API",
-        Version = "v1",
-        Description = "API de gestión de inventario y ventas IxClouds"
-    });
-});
+builder.Services.AddSwaggerGen();
 
 // Database
 builder.Services.AddDbContext < ApplicationDbContext > (options =>
-    options.UseSqlServer(
-        builder.Configuration.GetConnectionString("DefaultConnection"),
-        sqlOptions => sqlOptions.EnableRetryOnFailure()
-    ));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Services DI
+// Domain Services
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<ISaleService, SaleService>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
@@ -44,16 +26,10 @@ builder.Services.AddCors(options =>
     options.AddPolicy("Frontend", policy =>
         policy.WithOrigins("http://localhost:4200")
               .AllowAnyMethod()
-              .AllowAnyHeader()
-              .AllowCredentials());
+              .AllowAnyHeader());
 });
 
-// Logging
-builder.Logging.ClearProviders();
-builder.Logging.AddConsole();
-builder.Logging.AddDebug();
-
-var app = builder.Build();
+var app = builder.Build();  // ← DEFINIR app AQUÍ
 
 // Seed data
 using (var scope = app.Services.CreateScope())
@@ -75,14 +51,11 @@ using (var scope = app.Services.CreateScope())
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI(c =>
-    {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "IxClouds API v1");
-        c.RoutePrefix = "swagger";
-    });
+    app.UseSwaggerUI();
 }
 
-app.UseMiddleware < ExceptionHandlerMiddleware > ();
+app.UseMiddleware<IxClouds.API.Middleware.ExceptionHandlerMiddleware>();
+
 app.UseHttpsRedirection();
 app.UseCors("Frontend");
 app.UseAuthorization();

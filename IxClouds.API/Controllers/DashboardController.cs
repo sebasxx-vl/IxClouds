@@ -1,5 +1,5 @@
-using IxClouds.API.DTOs.Response;
-using IxClouds.API.Services;
+using IxClouds.Domain.DTOs.Response;
+using IxClouds.Domain.Interfaces.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace IxClouds.API.Controllers

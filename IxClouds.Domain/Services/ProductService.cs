@@ -1,6 +1,7 @@
-﻿using IxClouds.API.DTOs.Request;
-using IxClouds.API.DTOs.Response;
-using IxCloud.DataAccess;
+﻿using IxCloud.DataAccess;
+using IxCloud.DataAccess.Context;
+using IxClouds.Domain.DTOs.Request;
+using IxClouds.Domain.DTOs.Response;
 using IxClouds.Domain.Entities;
 using IxClouds.Domain.Interfaces.Services;
 using Microsoft.EntityFrameworkCore;

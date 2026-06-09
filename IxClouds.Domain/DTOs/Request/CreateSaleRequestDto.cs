@@ -1,6 +1,6 @@
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
-namespace IxClouds.API.DTOs.Request
+namespace IxClouds.Domain.DTOs.Request
 {
     public class CreateSaleRequestDto
     {

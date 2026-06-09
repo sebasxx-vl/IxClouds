@@ -1,12 +1,9 @@
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
-namespace IxClouds.API.DTOs.Request
+namespace IxClouds.Domain.DTOs.Request
 {
-    public class UpdateProductRequestDto
+    public class CreateProductRequestDto
     {
-        [Required(ErrorMessage = "El ID es obligatorio")]
-        public int Id { get; set; }
-
         [Required(ErrorMessage = "El nombre del producto es obligatorio")]
         [StringLength(100, MinimumLength = 2, ErrorMessage = "El nombre debe tener entre 2 y 100 caracteres")]
         public string Name { get; set; } = string.Empty;
@@ -39,7 +36,5 @@ namespace IxClouds.API.DTOs.Request
         [Url(ErrorMessage = "La URL de imagen no es válida")]
         [StringLength(500, ErrorMessage = "La URL no puede exceder 500 caracteres")]
         public string ImageUrl { get; set; } = string.Empty;
-
-        public bool IsActive { get; set; } = true;
     }
 }

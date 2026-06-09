@@ -1,4 +1,4 @@
-﻿using IxClouds.API.DTOs.Response;
+﻿using IxClouds.Domain.DTOs.Response;
 
 namespace IxClouds.Domain.Interfaces.Services
 {

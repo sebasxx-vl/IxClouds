@@ -1,5 +1,6 @@
-﻿using IxClouds.API.DTOs.Response;
-using IxCloud.DataAccess;
+﻿using IxCloud.DataAccess;
+using IxCloud.DataAccess.Context;
+using IxClouds.Domain.DTOs.Response;
 using IxClouds.Domain.Interfaces.Services;
 using Microsoft.EntityFrameworkCore;
 
@@ -27,6 +28,7 @@ namespace IxClouds.Domain.Services
             var totalTransactions = await _context.Sales.CountAsync();
             var monthlyRevenue = await _context.Sales.Where(s => s.SaleDate >= firstDayOfMonth).SumAsync(s => s.FinalAmount);
 
+            // Usar SaleItems DbSet directamente
             var topProducts = await _context.SaleItems
                 .Include(si => si.Product)
                 .Where(si => si.Product != null)

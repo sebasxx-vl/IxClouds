@@ -1,6 +1,6 @@
-using IxClouds.API.DTOs.Request;
-using IxClouds.API.DTOs.Response;
-using IxClouds.API.Services;
+using IxClouds.Domain.DTOs.Request;
+using IxClouds.Domain.DTOs.Response;
+using IxClouds.Domain.Interfaces.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace IxClouds.API.Controllers
@@ -17,9 +17,7 @@ namespace IxClouds.API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<SaleResponseDto>>> GetAll(
-            [FromQuery] DateTime? fromDate,
-            [FromQuery] DateTime? toDate)
+        public async Task<ActionResult<List<SaleResponseDto>>> GetAll([FromQuery] DateTime? fromDate, [FromQuery] DateTime? toDate)
         {
             var sales = await _saleService.GetSalesAsync(fromDate, toDate);
             return Ok(sales);

@@ -44,10 +44,7 @@ namespace IxClouds.API.Middleware
                 Message = exception.Message,
                 Type = exception.GetType().Name,
                 Timestamp = DateTime.UtcNow,
-                // Solo en desarrollo:
-                StackTrace = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development"
-                    ? exception.StackTrace
-                    : null
+                StackTrace = app.Environment.IsDevelopment() ? exception.StackTrace : null
             };
 
             context.Response.ContentType = "application/json";

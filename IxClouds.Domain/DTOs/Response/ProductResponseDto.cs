@@ -1,4 +1,4 @@
-namespace IxClouds.API.DTOs.Response
+﻿namespace IxClouds.Domain.DTOs.Response
 {
     public class ProductResponseDto
     {
