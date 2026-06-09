@@ -1,4 +1,7 @@
-namespace IxClouds.API.Services
+using IxClouds.API.DTOs.Request;
+using IxClouds.API.DTOs.Response;
+
+namespace IxClouds.Domain.Interfaces.Services
 {
     public interface ISaleService
     {

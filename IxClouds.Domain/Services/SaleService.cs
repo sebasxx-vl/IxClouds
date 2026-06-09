@@ -1,11 +1,12 @@
-using IxClouds.API.DTOs.Request;
+﻿using IxClouds.API.DTOs.Request;
 using IxClouds.API.DTOs.Response;
 using IxCloud.DataAccess;
 using IxClouds.Domain.Entities;
+using IxClouds.Domain.Interfaces.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
-namespace IxClouds.API.Services
+namespace IxClouds.Domain.Services
 {
     public class SaleService : ISaleService
     {
@@ -24,11 +25,16 @@ namespace IxClouds.API.Services
 
             try
             {
-                // Validar stock de todos los productos ANTES de procesar
-                var stockValidation = await ValidateStockAsync(dto.Items);
-                if (!stockValidation.IsValid)
+                foreach (var item in dto.Items)
                 {
-                    throw new InvalidOperationException(stockValidation.ErrorMessage);
+                    var product = await _context.Products.FindAsync(item.ProductId);
+                    if (product == null)
+                        throw new InvalidOperationException($"Producto ID {item.ProductId} no encontrado");
+                    if (product.StockQuantity < item.Quantity)
+                        throw new InvalidOperationException(
+                            $"Stock insuficiente para '{product.Name}'. Disponible: {product.StockQuantity}, Solicitado: {item.Quantity}");
+                    if (!product.IsActive)
+                        throw new InvalidOperationException($"El producto '{product.Name}' está inactivo");
                 }
 
                 var sale = new Sale
@@ -47,19 +53,7 @@ namespace IxClouds.API.Services
                 {
                     var product = await _context.Products.FindAsync(itemDto.ProductId);
 
-                    // Double-check stock (race condition protection)
-                    if (product == null)
-                        throw new InvalidOperationException($"Producto ID {itemDto.ProductId} no encontrado");
-
-                    if (product.StockQuantity < itemDto.Quantity)
-                        throw new InvalidOperationException(
-                            $"Stock insuficiente para '{product.Name}'. Disponible: {product.StockQuantity}, Solicitado: {itemDto.Quantity}");
-
-                    if (!product.IsActive)
-                        throw new InvalidOperationException($"El producto '{product.Name}' está inactivo");
-
-                    // Descontar stock
-                    product.StockQuantity -= itemDto.Quantity;
+                    product!.StockQuantity -= itemDto.Quantity;
                     product.UpdatedAt = DateTime.UtcNow;
 
                     var saleItem = new SaleItem
@@ -81,15 +75,14 @@ namespace IxClouds.API.Services
                 await _context.SaveChangesAsync();
                 await transaction.CommitAsync();
 
-                _logger.LogInformation("Venta creada exitosamente: {InvoiceNumber} por ${FinalAmount}",
+                _logger.LogInformation("Venta creada: {InvoiceNumber} por ${FinalAmount}",
                     sale.InvoiceNumber, sale.FinalAmount);
 
                 return MapToDto(sale);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 await transaction.RollbackAsync();
-                _logger.LogError(ex, "Error al crear venta");
                 throw;
             }
         }
@@ -128,30 +121,8 @@ namespace IxClouds.API.Services
         {
             var today = DateTime.UtcNow;
             var prefix = $"INV-{today:yyyyMMdd}";
-
-            var count = await _context.Sales
-                .CountAsync(s => s.SaleDate.Date == today.Date);
-
+            var count = await _context.Sales.CountAsync(s => s.SaleDate.Date == today.Date);
             return $"{prefix}-{(count + 1):D4}";
-        }
-
-        private async Task<(bool IsValid, string ErrorMessage)> ValidateStockAsync(List<SaleItemRequestDto> items)
-        {
-            foreach (var item in items)
-            {
-                var product = await _context.Products
-                    .AsNoTracking()
-                    .FirstOrDefaultAsync(p => p.Id == item.ProductId);
-
-                if (product == null)
-                    return (false, $"Producto ID {item.ProductId} no existe");
-
-                if (product.StockQuantity < item.Quantity)
-                    return (false,
-                        $"Stock insuficiente para '{product.Name}'. Disponible: {product.StockQuantity}, Solicitado: {item.Quantity}");
-            }
-
-            return (true, string.Empty);
         }
 
         private static SaleResponseDto MapToDto(Sale sale)

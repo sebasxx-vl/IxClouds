@@ -1,7 +1,8 @@
 using IxCloud.DataAccess.Seeders;
+using IxCloud.DataAccess;                              // ← sin S
 using IxClouds.API.Middleware;
-using IxClouds.API.Services;
-using IxClouds.DataAccess;
+using IxClouds.Domain.Interfaces.Services;             // ← interfaces
+using IxClouds.Domain.Services;                        // ← servicios movidos a Domain
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 

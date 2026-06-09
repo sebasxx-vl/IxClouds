@@ -1,11 +1,12 @@
+﻿using IxClouds.API.DTOs.Request;
 using IxClouds.API.DTOs.Response;
-using IxClouds.API.Services;
-using IxClouds.DataAccess;
+using IxCloud.DataAccess;
 using IxClouds.Domain.Entities;
+using IxClouds.Domain.Interfaces.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
-namespace IxClouds.API.Services
+namespace IxClouds.Domain.Services
 {
     public class ProductService : IProductService
     {
@@ -20,7 +21,6 @@ namespace IxClouds.API.Services
 
         public async Task<ProductResponseDto> CreateAsync(CreateProductRequestDto dto)
         {
-            // Verificar SKU único
             if (await _context.Products.AnyAsync(p => p.Sku == dto.Sku))
                 throw new InvalidOperationException($"Ya existe un producto con el SKU: {dto.Sku}");
 
@@ -54,7 +54,6 @@ namespace IxClouds.API.Services
             if (product == null)
                 throw new KeyNotFoundException($"Producto ID {id} no encontrado");
 
-            // Verificar SKU único (excluyendo el actual)
             if (await _context.Products.AnyAsync(p => p.Sku == dto.Sku && p.Id != id))
                 throw new InvalidOperationException($"Ya existe otro producto con el SKU: {dto.Sku}");
 
@@ -72,8 +71,6 @@ namespace IxClouds.API.Services
 
             await _context.SaveChangesAsync();
 
-            _logger.LogInformation("Producto actualizado: {Sku}", product.Sku);
-
             return MapToDto(product);
         }
 
@@ -82,13 +79,10 @@ namespace IxClouds.API.Services
             var product = await _context.Products.FindAsync(id);
             if (product == null) return false;
 
-            // Soft delete - marcar como inactivo en lugar de eliminar
             product.IsActive = false;
             product.UpdatedAt = DateTime.UtcNow;
 
             await _context.SaveChangesAsync();
-
-            _logger.LogInformation("Producto desactivado: {Sku}", product.Sku);
 
             return true;
         }
@@ -103,7 +97,6 @@ namespace IxClouds.API.Services
         {
             var query = _context.Products.AsQueryable();
 
-            // Filtros
             if (!string.IsNullOrWhiteSpace(filter.SearchTerm))
             {
                 var term = filter.SearchTerm.ToLower();
@@ -128,7 +121,6 @@ namespace IxClouds.API.Services
             if (filter.IsActive.HasValue)
                 query = query.Where(p => p.IsActive == filter.IsActive.Value);
 
-            // Ordenamiento
             query = filter.SortBy?.ToLower() switch
             {
                 "price" => filter.SortDescending ? query.OrderByDescending(p => p.Price) : query.OrderBy(p => p.Price),
