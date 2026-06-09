@@ -114,7 +114,6 @@ namespace IxClouds.DataAccess
             {
                 var product = products[random.Next(products.Count)];
                 var qty = random.Next(1, Math.Min(5, product.StockQuantity + 1));
-
                 if (qty == 0) continue;
 
                 var sale = new Sale
