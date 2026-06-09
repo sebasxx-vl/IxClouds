@@ -1,5 +1,4 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
 	<PropertyGroup>
 		<TargetFramework>net10.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
@@ -10,6 +9,6 @@
 		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.8" />
 	</ItemGroup>
 
-	<!-- NO referenciar IxCloud.DataAccess aquí -->
+	<!-- SIN ProjectReference a DataAccess -->
 
 </Project>

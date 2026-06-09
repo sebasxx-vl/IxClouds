@@ -19,8 +19,9 @@ public class Product
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
     // Navigation
-    public ICollection<SaleItem> SaleItems { get; set; } = new List<SaleItem>();
 
     public bool HasLowStock() => StockQuantity <= MinStockLevel;
     public decimal GetProfitMargin() => Price > 0 ? ((Price - Cost) / Price) * 100 : 0;
+    public ICollection<SaleItem> SaleItems { get; set; } = new List<SaleItem>();
+
 }

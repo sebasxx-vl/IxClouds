@@ -35,8 +35,9 @@ namespace IxCloud.DataAccess
                 entity.HasIndex(e => e.SaleDate);
                 entity.HasIndex(e => e.InvoiceNumber).IsUnique();
 
+                // ← Usa Items, no SaleItems
                 entity.HasMany(e => e.Items)
-                      .WithOne(si => si.Sale)  // ← SaleItem.Sale debe existir
+                      .WithOne(si => si.Sale)
                       .HasForeignKey(si => si.SaleId)
                       .OnDelete(DeleteBehavior.Cascade);
             });

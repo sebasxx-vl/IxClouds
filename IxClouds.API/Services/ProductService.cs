@@ -7,7 +7,7 @@ using IxClouds.Domain.Interfaces.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
-namespace IxClouds.Domain.Services
+namespace IxClouds.API.Services
 {
     public class ProductService : IProductService
     {

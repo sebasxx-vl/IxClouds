@@ -4,7 +4,7 @@ using IxClouds.Domain.DTOs.Response;
 using IxClouds.Domain.Interfaces.Services;
 using Microsoft.EntityFrameworkCore;
 
-namespace IxClouds.Domain.Services
+namespace IxClouds.API.Services
 {
     public class DashboardService : IDashboardService
     {
