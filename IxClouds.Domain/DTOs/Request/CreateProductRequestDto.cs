@@ -33,7 +33,6 @@ namespace IxClouds.Domain.DTOs.Request
         [StringLength(50, ErrorMessage = "La categoría no puede exceder 50 caracteres")]
         public string Category { get; set; } = string.Empty;
 
-        [Url(ErrorMessage = "La URL de imagen no es válida")]
         [StringLength(500, ErrorMessage = "La URL no puede exceder 500 caracteres")]
         public string ImageUrl { get; set; } = string.Empty;
     }

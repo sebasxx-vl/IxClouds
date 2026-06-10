@@ -1,25 +1,45 @@
 export interface Product {
   id: number;
-  brand: string;
-  phoneModel: string;
-  gender: string;
-  material: string;
-  stock: number;
-  purchasePrice: number;
-  salePrice: number;
+  name: string;
+  sku: string;
+  description: string;
+  category: string;
+  stockQuantity: number;
+  minStockLevel: number;
+  cost: number;
+  price: number;
   imageUrl: string;
+  isActive: boolean;
+  hasLowStock: boolean;
+  profitMargin: number;
   createdAt: Date;
-  stockStatus?: string;
+  updatedAt: Date;
 }
+
 export interface CreateProductRequest {
-  brand: string;
-  phoneModel: string;
-  gender: string;
-  material: string;
-  stock: number;
-  purchasePrice: number;
-  salePrice: number;
+  name: string;
+  sku: string;
+  description: string;
+  category: string;
+  stockQuantity: number;
+  minStockLevel: number;
+  cost: number;
+  price: number;
   imageUrl: string;
+  isActive: boolean;
 }
-export interface UpdateProductRequest extends CreateProductRequest { id: number; }
-export interface SearchProductRequest { brand?: string; phoneModel?: string; material?: string; gender?: string; }
+
+export interface UpdateProductRequest extends CreateProductRequest {
+  id: number;
+}
+
+export interface SearchProductRequest {
+  searchTerm?: string;
+  category?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  lowStockOnly?: boolean;
+  isActive?: boolean;
+  pageNumber?: number;
+  pageSize?: number;
+}

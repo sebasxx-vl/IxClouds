@@ -36,18 +36,19 @@ export class ProductFormComponent implements OnInit {
     private dialogRef: MatDialogRef<ProductFormComponent>,
     @Inject(MAT_DIALOG_DATA) public data: Product | null
   ) {
-
     this.isEdit = !!data;
 
     this.form = this.fb.group({
-      brand: ['', [Validators.required, Validators.maxLength(100)]],
-      phoneModel: ['', [Validators.required, Validators.maxLength(100)]],
-      gender: ['', Validators.maxLength(20)],
-      material: ['', Validators.maxLength(50)],
-      stock: [0, [Validators.required, Validators.min(0)]],
-      purchasePrice: [0, [Validators.required, Validators.min(0.01)]],
-      salePrice: [0, [Validators.required, Validators.min(0.01)]],
-      imageUrl: ['']
+      name: ['', [Validators.required, Validators.maxLength(100)]],
+      sku: ['', [Validators.required, Validators.maxLength(50)]],
+      description: ['', Validators.maxLength(500)],
+      category: ['', Validators.maxLength(50)],
+      stockQuantity: [0, [Validators.required, Validators.min(0)]],
+      minStockLevel: [5, [Validators.required, Validators.min(0)]],
+      cost: [0, [Validators.required, Validators.min(0)]],
+      price: [0, [Validators.required, Validators.min(0.01)]],
+      imageUrl: ['https://via.placeholder.com/300x200'],
+      isActive: [true]
     });
   }
 
@@ -58,47 +59,24 @@ export class ProductFormComponent implements OnInit {
   }
 
   onSubmit(): void {
+  if (this.form.valid) {
+    this.loading = true;
 
-    if (this.form.valid) {
-
-      this.loading = true;
-
-      if (this.isEdit && this.data) {
-
-        this.productService.updateProduct(
-          this.data.id,
-          {
-            ...this.form.value,
-            id: this.data.id
-          }
-        ).subscribe({
-          next: () => this.dialogRef.close(true),
-          error: () => {
-            alert('Error al guardar');
-            this.loading = false;
-          }
-        });
-
-      } else {
-
-        this.productService.createProduct(
-          this.form.value
-        ).subscribe({
-          next: () => this.dialogRef.close(true),
-          error: () => {
-            alert('Error al guardar');
-            this.loading = false;
-          }
-        });
-
-      }
-
+    if (this.isEdit && this.data) {
+      this.productService.updateProduct(this.data.id, { ...this.form.value, id: this.data.id }).subscribe({
+        next: () => this.dialogRef.close(true),
+        error: () => { alert('Error al guardar'); this.loading = false; }
+      });
+    } else {
+      this.productService.createProduct(this.form.value).subscribe({
+        next: () => this.dialogRef.close(true),
+        error: () => { alert('Error al guardar'); this.loading = false; }
+      });
     }
-
   }
+}
 
   onCancel(): void {
     this.dialogRef.close();
   }
-
 }
