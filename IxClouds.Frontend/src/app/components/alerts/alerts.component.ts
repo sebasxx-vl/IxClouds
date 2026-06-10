@@ -6,6 +6,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ProductService } from '../../services/product.service';
 import { Product } from '../../models/product.model';
+
 @Component({
   selector: 'app-alerts',
   standalone: true,
@@ -17,10 +18,16 @@ export class AlertsComponent implements OnInit {
   criticalProducts: Product[] = [];
   lowStockProducts: Product[] = [];
   loading = true;
+
   constructor(private productService: ProductService) {}
+
   ngOnInit(): void {
     this.productService.getLowStockProducts().subscribe({
-      next: (products) => { this.criticalProducts = products.filter(p => p.stock <= 2); this.lowStockProducts = products.filter(p => p.stock > 2 && p.stock <= 10); this.loading = false; },
+      next: (products) => {
+        this.criticalProducts = products.filter(p => p.stockQuantity <= 2);
+        this.lowStockProducts = products.filter(p => p.stockQuantity > 2 && p.stockQuantity <= 10);
+        this.loading = false;
+      },
       error: () => { this.loading = false; }
     });
   }

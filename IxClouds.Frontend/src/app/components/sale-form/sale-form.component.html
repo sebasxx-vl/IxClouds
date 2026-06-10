@@ -6,11 +6,18 @@
         <mat-form-field appearance="outline" class="product-select">
           <mat-label>Producto</mat-label>
           <mat-select formControlName="productId">
-            <mat-option *ngFor="let p of products" [value]="p.id">{{ p.brand }} {{ p.phoneModel }} - {{ p.salePrice | currency:"COP":"symbol":"1.0-0" }} (Stock: {{ p.stock }})</mat-option>
+            <mat-option *ngFor="let p of products" [value]="p.id">
+              {{ p.name }} - {{ p.price | currency:"COP":"symbol":"1.0-0" }} (Stock: {{ p.stockQuantity }})
+            </mat-option>
           </mat-select>
         </mat-form-field>
-        <mat-form-field appearance="outline" class="quantity-input"><mat-label>Cantidad</mat-label><input matInput type="number" formControlName="quantity" min="1"></mat-form-field>
-        <button mat-icon-button color="warn" type="button" (click)="removeItem(i)" *ngIf="items.length > 1"><mat-icon>delete</mat-icon></button>
+        <mat-form-field appearance="outline" class="quantity-input">
+          <mat-label>Cantidad</mat-label>
+          <input matInput type="number" formControlName="quantity" min="1">
+        </mat-form-field>
+        <button mat-icon-button color="warn" type="button" (click)="removeItem(i)" *ngIf="items.length > 1">
+          <mat-icon>delete</mat-icon>
+        </button>
       </div>
     </div>
     <button mat-button type="button" (click)="addItem()"><mat-icon>add</mat-icon> Agregar Producto</button>

@@ -1,4 +1,3 @@
-// inventory.component.ts — reemplaza el tuyo
 import { Component, OnInit } from '@angular/core';
 import { CommonModule, CurrencyPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -28,10 +27,10 @@ export class InventoryComponent implements OnInit {
   selectedStatus = 'all';
 
   statusTabs = [
-    { label: 'Todos',             value: 'all' },
-    { label: 'Normal',            value: 'normal' },
-    { label: 'Stock bajo',        value: 'low' },
-    { label: 'Crítico',           value: 'critical' },
+    { label: 'Todos',      value: 'all' },
+    { label: 'Normal',     value: 'normal' },
+    { label: 'Stock bajo', value: 'low' },
+    { label: 'Crítico',    value: 'critical' },
   ];
 
   constructor(
@@ -42,11 +41,15 @@ export class InventoryComponent implements OnInit {
   ngOnInit(): void { this.loadProducts(); }
 
   loadProducts(): void {
-    this.loading = true;
-    this.productService.getAllProducts().subscribe({
-      next: (data) => { this.products = data; this.applyFilters(); this.loading = false; },
-      error: () => { this.loading = false; }
-    });
+  this.loading = true;
+  this.productService.getAllProducts().subscribe({
+    next: (data) => {
+      this.products = Array.isArray(data) ? data : (data as any).items ?? [];
+      this.applyFilters();
+      this.loading = false;
+    },
+    error: () => { this.loading = false; }
+  });
   }
 
   setStatus(value: string): void {
@@ -58,15 +61,15 @@ export class InventoryComponent implements OnInit {
     this.filteredProducts = this.products.filter(p => {
       const term = this.searchTerm.toLowerCase();
       const matchSearch = !term ||
-        p.brand.toLowerCase().includes(term) ||
-        p.phoneModel.toLowerCase().includes(term) ||
-        p.material.toLowerCase().includes(term);
+        p.name.toLowerCase().includes(term) ||
+        p.sku.toLowerCase().includes(term) ||
+        p.category.toLowerCase().includes(term);
 
       const matchStatus =
         this.selectedStatus === 'all' ||
-        (this.selectedStatus === 'critical' && p.stock <= 2) ||
-        (this.selectedStatus === 'low'      && p.stock > 2 && p.stock <= 10) ||
-        (this.selectedStatus === 'normal'   && p.stock > 10);
+        (this.selectedStatus === 'critical' && p.stockQuantity <= 2) ||
+        (this.selectedStatus === 'low'      && p.stockQuantity > 2 && p.stockQuantity <= 10) ||
+        (this.selectedStatus === 'normal'   && p.stockQuantity > 10);
 
       return matchSearch && matchStatus;
     });

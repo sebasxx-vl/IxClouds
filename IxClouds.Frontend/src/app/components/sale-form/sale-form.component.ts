@@ -11,6 +11,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { SaleService } from '../../services/sale.service';
 import { ProductService } from '../../services/product.service';
 import { Product } from '../../models/product.model';
+
 @Component({
   selector: 'app-sale-form',
   standalone: true,
@@ -21,26 +22,42 @@ import { Product } from '../../models/product.model';
 export class SaleFormComponent implements OnInit {
   form: FormGroup;
   products: Product[] = [];
-  loading = false;
   submitting = false;
-  constructor(private fb: FormBuilder, private saleService: SaleService, private productService: ProductService, private dialogRef: MatDialogRef<SaleFormComponent>) {
+
+  constructor(
+    private fb: FormBuilder,
+    private saleService: SaleService,
+    private productService: ProductService,
+    private dialogRef: MatDialogRef<SaleFormComponent>
+  ) {
     this.form = this.fb.group({ items: this.fb.array([]) });
   }
+
   ngOnInit(): void {
     this.productService.getAllProducts().subscribe({
-      next: (data) => { this.products = data.filter(p => p.stock > 0); this.addItem(); },
+      next: (data) => { this.products = data.filter(p => p.stockQuantity > 0); this.addItem(); },
       error: () => alert('Error al cargar productos')
     });
   }
+
   get items(): FormArray { return this.form.get('items') as FormArray; }
-  addItem(): void { this.items.push(this.fb.group({ productId: ['', Validators.required], quantity: [1, [Validators.required, Validators.min(1)]] })); }
+
+  addItem(): void {
+    this.items.push(this.fb.group({
+      productId: ['', Validators.required],
+      quantity: [1, [Validators.required, Validators.min(1)]]
+    }));
+  }
+
   removeItem(i: number): void { this.items.removeAt(i); }
+
   getSubtotal(): number {
     return this.items.controls.reduce((sum, item) => {
       const product = this.products.find(p => p.id === item.get('productId')?.value);
-      return sum + (product ? product.salePrice * (item.get('quantity')?.value || 0) : 0);
+      return sum + (product ? product.price * (item.get('quantity')?.value || 0) : 0);
     }, 0);
   }
+
   onSubmit(): void {
     if (this.form.valid && this.items.length > 0) {
       this.submitting = true;
@@ -50,5 +67,6 @@ export class SaleFormComponent implements OnInit {
       });
     }
   }
+
   onCancel(): void { this.dialogRef.close(); }
 }

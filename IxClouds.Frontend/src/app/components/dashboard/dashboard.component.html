@@ -133,18 +133,18 @@
           <span class="empty-sub">No hay productos con stock bajo</span>
         </div>
 
-        <div class="stock-list" *ngIf="stats.lowStockProducts.length > 0">
-          <div class="stock-item" *ngFor="let p of stats.lowStockProducts">
-            <div class="stock-dot" [class.critical]="p.stock <= 2" [class.low]="p.stock > 2"></div>
-            <div class="stock-info">
-              <span class="stock-name">{{ p.brand }} {{ p.phoneModel }}</span>
-              <span class="stock-material">{{ p.material }}</span>
-            </div>
-            <span class="ix-badge" [class.danger]="p.stock <= 2" [class.warning]="p.stock > 2">
-              {{ p.stock }} uds
-            </span>
+       <div class="stock-list" *ngIf="stats.lowStockProducts.length > 0">
+        <div class="stock-item" *ngFor="let p of stats.lowStockProducts">
+          <div class="stock-dot" [class.critical]="p.stockQuantity <= 2" [class.low]="p.stockQuantity > 2"></div>
+          <div class="stock-info">
+            <span class="stock-name">{{ p.name }}</span>
+            <span class="stock-material">{{ p.category }}</span>
           </div>
+          <span class="ix-badge" [class.danger]="p.stockQuantity <= 2" [class.warning]="p.stockQuantity > 2">
+            {{ p.stockQuantity }} uds
+          </span>
         </div>
+      </div>
       </div>
 
     </div>
