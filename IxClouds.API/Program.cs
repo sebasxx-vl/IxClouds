@@ -1,5 +1,4 @@
 using IxCloud.DataAccess;
-using IxCloud.DataAccess;
 using IxClouds.API.Middleware;
 using IxClouds.API.Services;
 using IxClouds.Domain.Interfaces.Services;

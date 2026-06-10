@@ -43,8 +43,7 @@ namespace IxClouds.API.Middleware
                 StatusCode = (int)code,
                 Message = exception.Message,
                 Type = exception.GetType().Name,
-                Timestamp = DateTime.UtcNow,
-                StackTrace = app.Environment.IsDevelopment() ? exception.StackTrace : null
+                Timestamp = DateTime.UtcNow
             };
 
             context.Response.ContentType = "application/json";
